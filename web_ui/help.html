@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>YouTube REST API server help</title>
+
+        <link rel="stylesheet" href="/web_ui/styles/help.css">
+    </head>
+
+    <body>
+        <main>
+            <div class="endpoint-item margin-left">
+                <div class="endpoint-url-wrapper">
+                    <div>GET</div>
+                    <p>/api/get_video_info</p>
+                </div>
+
+                <div class="endpoint-description">
+                    <h4>Получить информацию о видео</h4>
+                    <div>
+                        <div>Query:</div>
+                        <table border="1">
+                            <tr>
+                                <th>Параметр</th>
+                                <th>Тип</th>
+                                <th>Значение</th>
+                                <th>Обязательный?</th>
+                                <th>Описание</th>
+                            </tr>
+
+                            <tr>
+                                <td>video_id</td>
+                                <td>string</td>
+                                <td>ID видео на YouTube</td>
+                                <td>Да</td>
+                                <td>ID запрашиваемого видео на YouTube. Обычно состоит из 11 строковых символов.</td>
+                            </tr>
+
+                            <tr>
+                                <td>api_client_name</td>
+                                <td>string</td>
+                                <td>Имя внутреннего клиента YouTube</td>
+                                <td>Нет</td>
+                                <td>
+                                    <p>ID внутреннего клиента YouTube, через который будет получена информацию о видео и ссылки для скачивания.
+                                        Разные клиенты могут выдавать разные форматы для скачивания.</p>
+                                    <p>Значение по-умолчанию: auto</p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>requested_data</td>
+                                <td>string</td>
+                                <td>Одно или несколько значений через запятую</td>
+                                <td>Нет</td>
+                                <td>
+                                    <p>Одно или несколько значений, перечисленных через запятую, указывающие, какие поля должны содержаться в ответе на запрос.
+                                        Если по какой-то причине запрашиваемое поле получить невозможно, оно не будет включено в ответ.
+                                        Если будет передано хотя-бы одно неподдерживаемое значение, сервер вернёт ошибку с кодом <b>400</b>.
+                                        Если будет передана пустая строка или последовательность из запятых (с пробелами или без), будет использовано значение по-умолчанию.
+                                        Если в списке передано значение "urls", будет предпринята попытка получить и расшифовать ссылки для скачивания, если это необходимо.
+                                        Если значение не передано или попытка не увенчается успехом, ссылки для скачивания видео могут оказаться недействительными или вовсе отсутствовать.
+                                        Если в списке передано значение "all", в ответе будет содержаться вся возможная информация о видео, независимо от того, какие ещё значения переданы.</p>
+                                    <p>Возможные значения: raw_video_info, parsed_video_info, urls, web_page, all</p>
+                                    <p>Значение по-умолчанию: all</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="endpoint-item margin-left">
+                <div class="endpoint-url-wrapper">
+                    <div style="border-color: blue;">POST</div>
+                    <p>/api/get_video_info</p>
+                </div>
+
+                <div class="endpoint-description">
+                    <h4>Получить информацию о видео</h4>
+                    <div>
+                        <div>Query: NONE</div>
+                        <div>Body:</div>
+                        <div class="post-body-code margin-left">
+                            <code>
+                                <pre><span class="post-body-code__color-system">{</span>
+    <span class="post-body-code__color-string">"video_id"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"843Rpqza_6o"</span><span class="post-body-code__color-system">,</span>
+    <span class="post-body-code__color-string">"api_client_name"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"auto"</span><span class="post-body-code__color-system">,</span>
+    <span class="post-body-code__color-string">"get_urls"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-bool">true</span><span class="post-body-code__color-system">,</span>
+    <span class="post-body-code__color-string">"requested_data"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"all"</span><span class="post-body-code__color-system">,</span>
+    <span class="post-body-code__color-string">"cookies"</span><span class="post-body-code__color-system">: [</span>
+        <span class="post-body-code__color-system">{</span>
+            <span class="post-body-code__color-string">"name"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"name1"</span><span class="post-body-code__color-system">,</span>
+            <span class="post-body-code__color-string">"value"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"value1"</span><span class="post-body-code__color-system">,</span>
+            <span class="post-body-code__color-string">"domain"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"domain1"</span><span class="post-body-code__color-system">,</span>
+            <span class="post-body-code__color-string">"path"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"/"</span>
+        <span class="post-body-code__color-system">}</span>
+    <span class="post-body-code__color-system">]</span>
+<span class="post-body-code__color-system">}</span></pre>
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="endpoint-item margin-left">
+                <div class="endpoint-url-wrapper">
+                    <div>GET</div>
+                    <p>/api/get_yt_client_list</p>
+                </div>
+
+                <div class="endpoint-description">
+                    <h4>Получить список поддерживаемых внутренних клиентов YouTube в виде массива JSON</h4>
+                    <div>Query: NONE</div>
+                </div>
+            </div>
+        </main> 
+    </body>
+</html>

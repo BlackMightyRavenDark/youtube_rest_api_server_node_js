@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>YouTube REST API server</title>
+
+        <script src="/web_ui/main.js" defer></script>
+
+        <link rel="stylesheet" href="/web_ui/styles/main.css">
+    </head>
+
+    <body>
+        <main>
+            <button onclick="window.open('/web_ui/help.html')">?</button>
+
+            <div class="search-section">
+                <div class="search-box">
+                    <div>
+                        <div>
+                            Введите ссылку на видео YouTube:
+                        </div>
+
+                        <div class="url-container">
+                            <div class="url-wrapper">
+                                <input type="text" placeholder="Введите ссылку на видео или его ID" id="inputUrl">
+                                <button id="btnSearch" disabled>Искать</button>
+                            </div>
+
+                            <div>
+                                <input type="checkbox" id="checkboxGetUrls" checked>
+                                <label for="checkboxGetUrls">Получить и расшифовать ссылки (если повезёт)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="client-selector">
+                        <label for="clientSelector">Клиент API:</label>
+                        <select name="client_id_selector" id="clientSelector"></select>
+                        <div>Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <details>
+                <summary>Cookies</summary>
+                <div>
+                    <div>
+                        <input type="checkbox" name="Use cookie" id="checkboxUseCookies">
+                        <label for="checkboxUseCookies">Use cookies</label>
+                    </div>
+                    <textarea name="cookieList" id="textareaCookies"></textarea>
+                </div>
+            </details>
+
+            <div class="loading-container">
+                <img src="/web_ui/images/loading.png" alt="loading.png">
+            </div>
+
+            <div class="error-message"></div>
+            <div class="video-info-root"></div>
+        </main>
+    </body>
+</html>
