@@ -18,7 +18,6 @@ class Clients {
                 innertubeClient.id = "tv_html5";
                 innertubeClient.nameInHeaders = "7";
                 innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version";
-                innertubeClient.params = "8AEB2AMB";
                 innertubeClient.supportsCookies = true;
                 break;
 
