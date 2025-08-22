@@ -100,8 +100,7 @@ class Utils {
     }
 
     static extractNFunctionCode(playerCode, globalVariable, nParameterValue) {
-        const regExp = globalVariable?.name ? new RegExp(`function\\(\\w{1,3}\\){var \\w{1,3}=.{3,6000}new Date.{1,1000}}catch.{3,20}return \\w{1,3}.{5,15}${globalVariable.name}\\[\\d{1,3}\\].{1,5};`, "s") :
-            /function\(\w{1,3}\){\(?:const|var|let\) \w{1,3}=.{30,6000}new Date.{10,1000}}catch.{3,20}return \w{1,3}.{5,15}\[\d{1,3}\].{1,5}/s;
+        const regExp = new RegExp(`function\\(\\w{1,3}\\){var \\w{1,3}=.{100,6000}new Date.{100,6000}${globalVariable.name}\\[\\d{1,3}\\]\\)};`, "s");
         const m = regExp.exec(playerCode);
         if (m) {
             if (nParameterValue) {
