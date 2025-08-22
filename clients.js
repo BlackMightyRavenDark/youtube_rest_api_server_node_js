@@ -17,7 +17,7 @@ class Clients {
             case "tv_html5":
                 innertubeClient.id = "tv_html5";
                 innertubeClient.nameInHeaders = "7";
-                innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version";
+                innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)";
                 innertubeClient.supportsCookies = true;
                 break;
 
