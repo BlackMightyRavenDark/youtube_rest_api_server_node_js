@@ -236,8 +236,8 @@ class Clients {
                 Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: ${consoleFont.FOREGROUND_ORANGE}${message}${consoleFont.DEFAULT}`);
             }
         } else {
-            errorCode = 401;
-            message = "Unable to process VIP video";
+            errorCode = 200;
+            message = getUrls ? "Unable to get VIP video download URLs" : null;
         }
 
         const answer = {

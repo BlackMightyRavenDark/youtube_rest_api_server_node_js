@@ -66,6 +66,9 @@ btnSearch.addEventListener("click", async () => {
     nodeLoadingIndicator.style.display = "none";
     if (response[0] === 200) {
         parseJson(response[1]);
+        if (response[1].message && typeof(response[1].message) === "string") {
+            showError(response[1].message);
+        }
     } else {
         console.log(response);
         const errorMessage = response[1].error_message || response[1].message || response[0].statusText || "Unknown error";
