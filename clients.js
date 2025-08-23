@@ -209,7 +209,7 @@ class Clients {
                                 }
 
                                 errorCode = responseApi.status;
-                                message = responseApi.statusText;
+                                if (errorCode !== 200) { message = responseApi.statusText; }
                             } else {
                                 errorCode = 404;
                                 message = "Can't find signature timestamp!";
