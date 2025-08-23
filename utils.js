@@ -74,11 +74,12 @@ class Utils {
         if (globalVariable) {
             const algorithm = Utils.extractCipherDeryptionAlgorithm(playerCode);
             if (algorithm) {
-                const part2name = algorithm[1].match(new RegExp(`;(.{1,3})\\[${globalVariable.name}\\[`, "s"));
-                if (part2name) {
-                    const part2code = playerCode.match(new RegExp(`(?:const|var|let) ${part2name[1]}=\\{.{50,1000}\\}\\}`, "s"));
-                    if (part2code) {
-                        const code = `${globalVariable.code};\r\n${part2code};\r\nconst ${algorithm[0]}=${algorithm[1]}\r\n`;
+                const part2name = algorithm[1].match(new RegExp(`function\\(.{1,3}\\).{1,20};(?<name>.{1,6})\\[${globalVariable.name}\\[`));
+                if (part2name?.groups?.name) {
+                    const escapedFunctionName = part2name.groups.name.replaceAll("$", "\\$");
+                    const part2code = playerCode.match(new RegExp(`(?:const|let|var) ${escapedFunctionName}=.{1,1000}}};`, "s"));
+                    if (part2code?.length > 0) {
+                        const code = `${globalVariable.code};\r\n${part2code[0]}\r\nconst ${algorithm[0]}=${algorithm[1]}\r\n`;
                         return [code, algorithm[0]];
                     }
                 }
