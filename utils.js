@@ -54,13 +54,15 @@ class Utils {
         }
     }
 
-    static async downloadYouTubeConfig(apiClientName, videoId, headers, cookies) {
+    static async downloadYouTubeClientConfiguratiom(client, videoId, cookies) {
         const urls = {
             "web_embedded": `https://www.youtube.com/embed/${videoId}?html5=1`,
             "tv_html5": "https://www.youtube.com/tv"
         };
-        const url = urls[apiClientName];
-        const response = await Utils.downloadString(url, headers, cookies);
+        const headers = { };
+        if (client.userAgentYtcfg) { headers["User-Agent"] = client.userAgentYtcfg; }
+        else if (client.userAgent) { headers["User-Agent"] = client.userAgent; }
+        const response = await Utils.downloadString(urls[client.id], headers, cookies);
         if (response[0] == 200) {
             const ytcfg = Utils.extractYoutubeConfigFromWebPageCode(response[2]);
             return [ytcfg ? 200 : 400, ytcfg];
@@ -305,7 +307,7 @@ class Utils {
             {
                 "display_name": "WEB EMBEDDED",
                 "id": "web_embedded",
-                "supports_cookies": true
+                "supports_cookies": false
             }
         ]
     }

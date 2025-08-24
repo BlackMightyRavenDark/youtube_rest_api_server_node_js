@@ -53,6 +53,12 @@ btnSearch.addEventListener("click", async () => {
         return;
     }
 
+    if (checkBoxUseCookies.checked && clientSelector.options[clientSelector.selectedIndex].getAttribute("supports_cookies") !== "true") {
+        alert("Ошибка! Выбранный клиент не поддерживает куки!");
+        enableControls(true);
+        return;
+    }
+
     const jCookies = checkBoxUseCookies.checked ? tryParseCookies() : null;
     if (checkBoxUseCookies.checked && !jCookies) {
         showError("Can't parse cookies!");
@@ -576,6 +582,7 @@ function enableControls(enabled) {
             const nodeOption = document.createElement("option");
             nodeOption.value = j.id;
             nodeOption.textContent = j.display_name;
+            nodeOption.setAttribute("supports_cookies", j.supports_cookies);
             clientSelector.appendChild(nodeOption);
         });
 

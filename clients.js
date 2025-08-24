@@ -10,7 +10,9 @@ class Clients {
         Utils.logToConsole(`Client ${client[2]} is requested video '${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}'`);
         if (!apiClientName || typeof(apiClientName) !== "string") { apiClientName = "auto"; }
 
-        const innertubeClient = {};
+        const innertubeClient = {
+            "userAgentWebPage": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"
+        };
 
         switch (apiClientName) {
             case "auto":
@@ -18,14 +20,16 @@ class Clients {
                 innertubeClient.id = "tv_html5";
                 innertubeClient.nameInHeaders = "7";
                 innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)";
+                innertubeClient.userAgentYtcfg = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version";
                 innertubeClient.supportsCookies = true;
                 break;
 
             case "web_embedded":
                 innertubeClient.id = "web_embedded";
-                innertubeClient.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.85 Safari/537.36";
+                innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)";
+                innertubeClient.userAgentYtcfg = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version";
                 innertubeClient.nameInHeaders = "56";
-                innertubeClient.supportsCookies = true;
+                innertubeClient.supportsCookies = false;
                 break;
 
             default:
@@ -41,8 +45,16 @@ class Clients {
     }
 
     static async #getVideoInfoViaClient(client, videoId, config, cookies) {
-        if (client.supportsCookies && cookies?.length > 0) {
+        if (cookies?.length > 0) {
             Utils.logToConsole(`[${consoleFont.FOREGROUND_BRIGHT_WHITE}${videoId}${consoleFont.DEFAULT}]: Passed ${cookies.length} cookies`);
+            if (!client.supportsCookies) {
+                Utils.logToConsole(`[${consoleFont.FOREGROUND_BRIGHT_WHITE}${videoId}${consoleFont.DEFAULT}]: Client '${client.id}' does not support cookies`);
+                return {
+                    "error_code": 400,
+                    "error_message": "Client does not support cookies",
+                    "client_id": client.id
+                }
+            }
         }
 
         const requestedDataSet = Utils.getSetFromParameters(config.requestedData);
@@ -69,7 +81,7 @@ class Clients {
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate, br, zstd",
             "Host": "www.youtube.com",
-            "User-Agent": client.userAgent
+            "User-Agent": client.userAgentWebPage
         };
         if (cookieHeaderValue) { videoWebPageHeaders["cookie"] = cookieHeaderValue; }
 
@@ -147,7 +159,7 @@ class Clients {
                     const visitorData = ytcfgVideoWebPage.VISITOR_DATA;
                     if (visitorData) {
                         Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: Downloading the '${client.id}' API configuration...`);
-                        const responseYtcfg = await Utils.downloadYouTubeConfig(client.id, videoId, { "User-Agent": client.userAgent }, cookies);
+                        const responseYtcfg = await Utils.downloadYouTubeClientConfiguratiom(client, videoId, cookies);
                         if (responseYtcfg[0] === 200) {
                             client.config = responseYtcfg[1];
                             const signatureTimestamp = ytcfgVideoWebPage.STS ?? Utils.extractSignatureTimestampFromPlayerCode(playerData[0]);
