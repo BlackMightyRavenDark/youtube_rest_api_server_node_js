@@ -221,7 +221,7 @@ class Utils {
         const h = date.getUTCHours().toString();
         const m = date.getUTCMinutes().toString();
         const s = date.getUTCSeconds().toString();
-        return `${date.getUTCFullYear()}-${date.getUTCMonth().toString().padStart(2, "0")}-${date.getUTCDay().toString().padStart(2, "0")} ` +
+        return `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")} ` +
             `${h.padStart(2, "0")}:${m.padStart(2, "0")}:${s.padStart(2, "0")}.${date.getUTCMilliseconds().toString().padStart(4, "0")} GMT`;
     }
 
