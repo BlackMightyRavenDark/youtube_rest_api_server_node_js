@@ -160,10 +160,12 @@ class Utils {
         if (thumbnails.length > 0) {
             for (let i = 0; i < thumbnails.length; ++i) {
                 if (thumbnails[i].url.includes("webp")) {
+                    const url = thumbnails[i].url.replace("vi_webp", "vi").replace(".webp", ".jpg");
+                    if (thumbnails.find(item => item.url === url)) { break; }
                     thumbnails.splice(0, 0, {
-                        "width": sorted[i].width,
-                        "height": sorted[i].height,
-                        "url": sorted[i].url.replace("vi_webp", "vi").replace(".webp", ".jpg")
+                        "width": thumbnails[i].width,
+                        "height": thumbnails[i].height,
+                        "url": url
                     });
                     break;
                 }
@@ -171,9 +173,9 @@ class Utils {
 
             if (thumbnails[0].url.includes("?")) {
                 thumbnails.splice(0, 0, {
-                    "url": thumbnails[0].url.substring(0, thumbnails[0].url.indexOf("?")),
                     "width": thumbnails[0].width,
-                    "height": thumbnails[0].height
+                    "height": thumbnails[0].height,
+                    "url": thumbnails[0].url.substring(0, thumbnails[0].url.indexOf("?"))
                 });
             }
         }
