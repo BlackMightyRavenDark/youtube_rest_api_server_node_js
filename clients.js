@@ -9,6 +9,7 @@ class Clients {
     static async getVideoInfo(videoId, apiClientName, config, cookies, client) {
         Utils.logToConsole(`Client ${client[2]} is requested video '${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}'`);
         if (!apiClientName || typeof(apiClientName) !== "string") { apiClientName = "auto"; }
+        if (apiClientName === "auto" && cookies?.length > 0) { apiClientName = "tv_embedded"; }
 
         const innertubeClient = {
             "userAgentWebPage": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"
@@ -21,6 +22,12 @@ class Clients {
                 innertubeClient.nameInHeaders = "7";
                 innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)";
                 innertubeClient.userAgentYtcfg = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version";
+                innertubeClient.supportsCookies = true;
+                break;
+
+            case "tv_embedded":
+                innertubeClient.id = "tv_embedded";
+                innertubeClient.nameInHeaders = "85";
                 innertubeClient.supportsCookies = true;
                 break;
 
@@ -159,20 +166,22 @@ class Clients {
                     const visitorData = ytcfgVideoWebPage.VISITOR_DATA;
                     if (visitorData) {
                         Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: Downloading the '${client.id}' API configuration...`);
-                        const responseYtcfg = await Utils.downloadYouTubeClientConfiguratiom(client, videoId, cookies);
+                        const responseYtcfg = await Utils.getYouTubeClientConfiguratiom(client, videoId, cookies);
                         if (responseYtcfg[0] === 200) {
                             client.config = responseYtcfg[1];
                             const signatureTimestamp = ytcfgVideoWebPage.STS ?? Utils.extractSignatureTimestampFromPlayerCode(playerData[0]);
                             if (signatureTimestamp) {
                                 const headers = {
                                     "Origin": Utils.YOUTUBE_URL,
-                                    "User-Agent": `${client.userAgent},gzip(gfe)`,
                                     "X-Goog-Visitor-Id": visitorData,
                                     "X-YouTube-Client-Name": client.nameInHeaders,
                                     "X-YouTube-Client-Version": client.config.INNERTUBE_CONTEXT.client.clientVersion
                                 };
+                                if (client.userAgent) {
+                                    headers["User-Agent"] = `${client.userAgent},gzip(gfe)`;
+                                }
                                 if (cookieHeaderValue) {
-                                    headers["cookie"] = cookieHeaderValue; 
+                                    headers["cookie"] = cookieHeaderValue;
 
                                     const authorizationHeaders = Clients.#generateCookieAuthorizationHeaders(filteredCookies, ytcfgVideoWebPage);
                                     if (authorizationHeaders) {
