@@ -150,7 +150,7 @@ class Clients {
                     "client_id": "web_page"
                 };
                 if (requestedDataSet.has("raw_video_info") || requestedDataSet.has("all")) {
-                    j['raw_video_info'] = rawVideoInfoFromWebPage;
+                    j["raw_video_info"] = rawVideoInfoFromWebPage;
                 }
                 if (requestedDataSet.has("parsed_video_info") || requestedDataSet.has("all")) {
                     j["video_info"] = parsedVideoInfo;
@@ -277,7 +277,7 @@ class Clients {
             answer["video_info"] = parsedVideoInfo;
         }
         if (requestedDataSet.has("raw_video_info") || requestedDataSet.has("all")) {
-            answer['raw_video_info'] = rawVideoInfoFromWebPage;
+            answer["raw_video_info"] = rawVideoInfoFromWebPage;
         }
         if (requestedDataSet.has("web_page") || requestedDataSet.has("all")) {
             answer["web_page_code"] = videoWebPageCode;

@@ -2,7 +2,7 @@
 
 const consoleFont = require("./consoleFont");
 const path = require("node:path");
-const fs = require('node:fs');
+const fs = require("node:fs");
 const fsPromises = require("node:fs/promises");
 const zlib = require("node:zlib");
 
