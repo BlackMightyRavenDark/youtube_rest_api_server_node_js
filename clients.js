@@ -9,7 +9,7 @@ class Clients {
     static async getVideoInfo(videoId, apiClientName, config, cookies, client) {
         Utils.logToConsole(`Client ${client[2]} is requested video '${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}'`);
         if (!apiClientName || typeof(apiClientName) !== "string") { apiClientName = "auto"; }
-        if (apiClientName === "auto" && cookies?.length > 0) { apiClientName = "tv_embedded"; }
+        if (apiClientName === "auto" && (cookies?.length > 0 || Utils.defaultCookies?.length > 0)) { apiClientName = "tv_embedded"; }
 
         const innertubeClient = {
             "userAgentWebPage": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"
@@ -54,13 +54,17 @@ class Clients {
     static async #getVideoInfoViaClient(client, videoId, config, cookies) {
         if (cookies?.length > 0) {
             Utils.logToConsole(`[${consoleFont.FOREGROUND_BRIGHT_WHITE}${videoId}${consoleFont.DEFAULT}]: Passed ${cookies.length} cookies`);
-            if (!client.supportsCookies) {
-                Utils.logToConsole(`[${consoleFont.FOREGROUND_BRIGHT_WHITE}${videoId}${consoleFont.DEFAULT}]: Client '${client.id}' does not support cookies`);
-                return {
-                    "error_code": 400,
-                    "error_message": "Client does not support cookies",
-                    "client_id": client.id
-                }
+        } else if (Utils.defaultCookies?.length > 0) {
+            Utils.logToConsole(`[${consoleFont.FOREGROUND_BRIGHT_WHITE}${videoId}${consoleFont.DEFAULT}]: Using ${Utils.defaultCookies.length} default cookies`);
+            cookies = Utils.defaultCookies;
+        }
+
+        if (!client.supportsCookies && cookies?.length > 0) {
+            Utils.logToConsole(`[${consoleFont.FOREGROUND_BRIGHT_WHITE}${videoId}${consoleFont.DEFAULT}]: Client '${client.id}' does not support cookies`);
+            return {
+                "error_code": 400,
+                "error_message": "Client does not support cookies",
+                "client_id": client.id
             }
         }
 

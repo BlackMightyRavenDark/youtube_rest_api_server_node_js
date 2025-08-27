@@ -7,6 +7,8 @@ const clientSelector = document.querySelector("#clientSelector");
 const checkBoxGetUrls = document.querySelector("#checkboxGetUrls");
 const checkBoxUseCookies = document.querySelector("#checkboxUseCookies");
 const textareaCookies = document.querySelector("textarea");
+const btnSendDefaultCookies = document.querySelector(".btn-send-default-cookies");
+const btnClearDefaultCookies = document.querySelector(".btn-clear-default-cookies");
 const nodeLoadingIndicator = document.querySelector(".loading-container");
 const nodeErrorMessage = document.querySelector(".error-message");
 const nodeVideoInfoRoot = document.querySelector(".video-info-root");
@@ -24,6 +26,42 @@ textareaCookies.addEventListener("focusout", () => {
     } else if (localStorage.getItem("cookies")) {
         localStorage.removeItem("cookies");
     }
+});
+
+btnSendDefaultCookies.addEventListener("click", async () => {
+    enableControls(false);
+    if (textareaCookies.value) {
+        const jCookies = tryParseJson(textareaCookies.value);
+        if (!jCookies) {
+            alert("Ошибка списка куков!");
+            enableControls(true);
+            return;
+        }
+
+        const body = JSON.stringify({ "cookies": jCookies });
+        const options = {
+            "method": "PUT",
+            "headers": {
+                "Content-Type": "application/json",
+                "Content-Length": Uint8Array.from(body).length.toString()
+            },
+            "body": body
+        }
+        const response = await fetch("api/default_cookies", options);
+        const responseText = await response.text();
+        const message = response.status === 200 ? responseText : `Ошибка! ${responseText}!`;
+        alert(message)
+    } else {
+        alert("Введите список куков!");
+    }
+    enableControls(true);
+});
+
+btnClearDefaultCookies.addEventListener("click", async () => {
+    const response = await fetch("api/default_cookies", { "method": "DELETE" });
+    const responseText = await response.text();
+    const message = response.status === 200 ? responseText : `Ошибка! ${responseText}!`;
+    alert(message)
 });
 
 btnSearch.addEventListener("click", async () => {
@@ -565,7 +603,9 @@ function enableControls(enabled) {
     checkBoxGetUrls.disabled =
     clientSelector.disabled =
     checkBoxUseCookies.disabled =
-    textareaCookies.disabled = !enabled;
+    textareaCookies.disabled =
+    btnSendDefaultCookies.disabled =
+    btnClearDefaultCookies.disabled = !enabled;
 }
 
 (async () => {

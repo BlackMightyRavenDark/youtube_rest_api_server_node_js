@@ -104,7 +104,7 @@ class Server {
                 if (requestedPathSplitted.length > 0) {
                     switch (requestedEndpoint) {
                         case "/api/get_video_info":
-                            await this.#processGetVideoInfo(client, requestedPathSplitted[1], parsedRequest.headers, Utils.cookies);
+                            await this.#processGetVideoInfo(client, requestedPathSplitted[1], parsedRequest.headers);
                             return;
 
                         case "/api/get_yt_client_list":
@@ -132,6 +132,37 @@ class Server {
                         const cookieArray = bodyParsed.cookies?.filter(() => true);
 
                         await this.#processGetVideoInfo(client, query.toString(), parsedRequest.headers, cookieArray);
+                        return;
+                }
+                break;
+
+            case "PUT":
+                switch (requestedEndpoint) {
+                    case "/api/default_cookies":
+                        const bodyParsed = Utils.tryParseJson(parsedRequest.body);
+                        if (!bodyParsed) {
+                            Utils.answerClient(client[1], 500, null, "Unable to parse body");
+                            return;
+                        }
+
+                        if (!bodyParsed.cookies || bodyParsed.cookies.length == 0) {
+                            Utils.answerClient(client[1], 400, null, "No cookie sent");
+                            return;
+                        }
+
+                        Utils.defaultCookies = bodyParsed.cookies;
+                        Utils.logToConsole(`${consoleFont.FOREGROUND_ORANGE}Client ${client[2]} set ${Utils.defaultCookies.length} default cookies${consoleFont.DEFAULT}`);
+                        Utils.answerClient(client[1], 200, null, "Default cookies accepted");
+                        return;
+                }
+                break;
+
+            case "DELETE":
+                switch (requestedEndpoint) {
+                    case "/api/default_cookies":
+                        Utils.defaultCookies = null;
+                        Utils.logToConsole(`${consoleFont.FOREGROUND_ORANGE}Client ${client[2]} has cleared all default cookies${consoleFont.DEFAULT}`);
+                        Utils.answerClient(client[1], 200, null, "Default cookies cleared");
                         return;
                 }
                 break;

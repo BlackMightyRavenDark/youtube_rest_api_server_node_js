@@ -17,7 +17,7 @@
                 </div>
 
                 <div class="endpoint-description">
-                    <h4>Получить информацию о видео</h4>
+                    <h4>Получить информацию о видео. Будут использованы куки по-умолчанию, если они установлены на сервере.</h4>
                     <div>
                         <div>Query:</div>
                         <table border="1">
@@ -113,6 +113,49 @@
                 <div class="endpoint-description">
                     <h4>Получить список поддерживаемых внутренних клиентов YouTube в виде массива JSON</h4>
                     <div>Query: NONE</div>
+                </div>
+            </div>
+
+            <div class="endpoint-item margin-left">
+                <div class="endpoint-url-wrapper">
+                    <div style="border-color: orange;">PUT</div>
+                    <p>/api/default_cookies</p>
+                </div>
+
+                <div class="endpoint-description">
+                    <h4>Установить куки (cookies) по-умолчанию. Эти куки будут использованы, если клиент отправил запрос без куков.</h4>
+                    <div>
+                        <div>Query: NONE</div>
+                        <div>Body:</div>
+                        <div class="post-body-code margin-left">
+                            <code>
+                                <pre><span class="post-body-code__color-system">{</span>
+    <span class="post-body-code__color-string">"cookies"</span><span class="post-body-code__color-system">: [</span>
+        <span class="post-body-code__color-system">{</span>
+            <span class="post-body-code__color-string">"name"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"name1"</span><span class="post-body-code__color-system">,</span>
+            <span class="post-body-code__color-string">"value"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"value1"</span><span class="post-body-code__color-system">,</span>
+            <span class="post-body-code__color-string">"domain"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"domain1"</span><span class="post-body-code__color-system">,</span>
+            <span class="post-body-code__color-string">"path"</span><span class="post-body-code__color-system">: </span><span class="post-body-code__color-string">"/"</span>
+        <span class="post-body-code__color-system">}</span>
+    <span class="post-body-code__color-system">]</span>
+<span class="post-body-code__color-system">}</span></pre>
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="endpoint-item margin-left">
+                <div class="endpoint-url-wrapper">
+                    <div style="border-color: black;">DELETE</div>
+                    <p>/api/default_cookies</p>
+                </div>
+
+                <div class="endpoint-description">
+                    <h4>Удалить куки (cookies) по-умолчанию.</h4>
+                    <div>
+                        <div>Query: NONE</div>
+                    </div>
                 </div>
             </div>
         </main> 
