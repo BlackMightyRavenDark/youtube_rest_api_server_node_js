@@ -161,6 +161,12 @@ class Utils {
                     "url": thumbnails[0].url.substring(0, thumbnails[0].url.indexOf("?"))
                 });
             }
+        } else if (rawVideoInfo.playabilityStatus?.errorScreen?.playerErrorMessageRenderer?.thumbnail?.thumbnails?.length > 0) {
+            thumbnails.push({
+                "width": rawVideoInfo.playabilityStatus.errorScreen.playerErrorMessageRenderer.thumbnail.thumbnails[0].width,
+                "height": rawVideoInfo.playabilityStatus.errorScreen.playerErrorMessageRenderer.thumbnail.thumbnails[0].height,
+                "url": `https:${rawVideoInfo.playabilityStatus.errorScreen.playerErrorMessageRenderer.thumbnail.thumbnails[0].url}`
+            });
         }
 
         return thumbnails;

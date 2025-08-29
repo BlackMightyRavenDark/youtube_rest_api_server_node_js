@@ -150,14 +150,13 @@ function parseJson(json) {
     const nodeVideoImageFormatsWrapper = document.createElement("div");
     nodeVideoImageFormatsWrapper.classList.add("image-formats-wrapper");
 
-    if (jParsedVideoInfo.thumbnails) {
+    if (jParsedVideoInfo.thumbnails?.length > 0) {
         for (const thumbnail of jParsedVideoInfo.thumbnails) {
             const nodeVideoThumbnailButton = document.createElement("button");
             nodeVideoThumbnailButton.classList.add("button-thumbnail");
 
             const nodeVideoThumbnailFileName = document.createElement("span");
-            const matchFileName = /\/vi(?:_webp)?\/.{11}\/([^\&\?\\\/]+\.\w{3,4})/.exec(thumbnail.url);
-            nodeVideoThumbnailFileName.textContent = matchFileName?.length > 1 ? matchFileName[1] : "unnamed";
+            nodeVideoThumbnailFileName.textContent = extractThumbnailFileName(thumbnail.url) || "unnamed";
             nodeVideoThumbnailButton.addEventListener("click", () => {
                 nodeVideoImage.setAttribute("src", thumbnail.url);
                 nodeVideoImageAnchor.setAttribute("href", thumbnail.url);
@@ -181,8 +180,9 @@ function parseJson(json) {
             nodeVideoThumbnailButton.appendChild(nodeVideoThumbnailButtonFlex);
             nodeVideoImageFormatsWrapper.appendChild(nodeVideoThumbnailButton);
         }
+
+        nodeVideoImageFormatsWrapper.firstChild?.classList.add("button-thumbnail__active");
     }
-    nodeVideoImageFormatsWrapper.firstChild.classList.add("button-thumbnail__active");
 
     const nodeVideoImageContainer = document.createElement("div");
     nodeVideoImageContainer.classList.add("video-info__image-container");
@@ -192,20 +192,26 @@ function parseJson(json) {
     const nodeVideoBaseInfo = document.createElement("div");
     nodeVideoBaseInfo.appendChild(nodeVideoImageContainer);
 
-    if (jParsedVideoInfo.id) {
+    if (jParsedVideoInfo.title) {
         const nodeVideoTitle = document.createElement("a");
         nodeVideoTitle.textContent = jParsedVideoInfo.title;
-        nodeVideoTitle.setAttribute("href", `${YOUTUBE_URL}/watch?v=${jParsedVideoInfo.id}`);
-        nodeVideoTitle.setAttribute("target", "_blank");
+        if (jParsedVideoInfo.id) {
+            nodeVideoTitle.setAttribute("href", `${YOUTUBE_URL}/watch?v=${jParsedVideoInfo.id}`);
+            nodeVideoTitle.setAttribute("target", "_blank");
+        }
         nodeVideoBaseInfo.appendChild(nodeVideoTitle);
     }
 
-    if (jParsedVideoInfo.owner_channel.id) {
-        const nodeChannelTitle = document.createElement("a");
-        nodeChannelTitle.textContent = jParsedVideoInfo.owner_channel.title;
-        nodeChannelTitle.setAttribute("href", `${YOUTUBE_URL}/channel/${jParsedVideoInfo.owner_channel.id}/videos`);
-        nodeChannelTitle.setAttribute("target", "_blank");
-        nodeVideoBaseInfo.appendChild(nodeChannelTitle);
+    if (jParsedVideoInfo.owner_channel) {
+        if (jParsedVideoInfo.owner_channel.title) {
+            const nodeChannelTitle = document.createElement("a");
+            nodeChannelTitle.textContent = jParsedVideoInfo.owner_channel.title;
+            if (jParsedVideoInfo.owner_channel.id) {
+                nodeChannelTitle.setAttribute("href", `${YOUTUBE_URL}/channel/${jParsedVideoInfo.owner_channel.id}/videos`);
+                nodeChannelTitle.setAttribute("target", "_blank");
+            }
+            nodeVideoBaseInfo.appendChild(nodeChannelTitle);
+        }
     }
 
     nodeVideoInfoRoot.appendChild(nodeVideoBaseInfo);
@@ -511,6 +517,12 @@ function formatTime(date) {
     const s = date.getUTCSeconds();
     const seconds = h * 3600 + m * 60 + s;
     return [seconds > 0 ? `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}` : "0:00:00", seconds];
+}
+
+function extractThumbnailFileName(thumbnailUrl) {
+    let matchFileName = /\/vi(?:_webp)?\/.{11}\/([^\&\?\\\/]+\.\w{3,4})/.exec(thumbnailUrl);
+    if (!matchFileName) { matchFileName = /\/img\/(.*\.png$)/.exec(thumbnailUrl); }
+    return matchFileName?.length > 1 ? matchFileName[1] : null;
 }
 
 function formatSize(n) {
