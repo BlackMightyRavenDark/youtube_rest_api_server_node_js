@@ -1,6 +1,8 @@
 "use strict";
 
 const YOUTUBE_URL = "https://www.youtube.com";
+const WEB_UI_PATH = "/web_ui/";
+
 const inputUrl = document.querySelector("#inputUrl");
 const btnSearch = document.querySelector("#btnSearch");
 const clientSelector = document.querySelector("#clientSelector");
@@ -16,7 +18,7 @@ let timerCountdown;
 
 inputUrl.addEventListener("input", () => {
     const encoded = inputUrl.value ? encodeURIComponent(inputUrl.value) : null;
-    history.pushState(null, null, encoded ? `/web_ui?input=${encoded}` : "/web_ui");
+    history.pushState(null, null, encoded ? `${WEB_UI_PATH}?input=${encoded}` : WEB_UI_PATH);
 });
 
 textareaCookies.addEventListener("focusout", () => {
@@ -47,7 +49,7 @@ btnSendDefaultCookies.addEventListener("click", async () => {
             },
             "body": body
         }
-        const response = await fetch("api/default_cookies", options);
+        const response = await fetch("/api/default_cookies", options);
         const responseText = await response.text();
         const message = response.status === 200 ? responseText : `Ошибка! ${responseText}!`;
         alert(message)
@@ -58,7 +60,7 @@ btnSendDefaultCookies.addEventListener("click", async () => {
 });
 
 btnClearDefaultCookies.addEventListener("click", async () => {
-    const response = await fetch("api/default_cookies", { "method": "DELETE" });
+    const response = await fetch("/api/default_cookies", { "method": "DELETE" });
     const responseText = await response.text();
     const message = response.status === 200 ? responseText : `Ошибка! ${responseText}!`;
     alert(message)
@@ -551,7 +553,7 @@ async function getVideoInfo(videoId, apiClientName, getDownloadUrls, cookies, us
                 "Content-Length": bodyBuffer.length.toString()
             };
 
-            const url = "api/get_video_info";
+            const url = "/api/get_video_info";
             response = await fetch(url, options);
         } else {
             const query = new URLSearchParams();
@@ -559,7 +561,7 @@ async function getVideoInfo(videoId, apiClientName, getDownloadUrls, cookies, us
             query.append("api_client_name", apiClientName);
             query.append("requested_data", requestedDataString);
 
-            const url = `api/get_video_info?${query}`;
+            const url = `/api/get_video_info?${query}`;
             response = await fetch(url);
         }
 
@@ -622,7 +624,8 @@ function enableControls(enabled) {
 
 (async () => {
     const urlParameters = new URLSearchParams(window.location.search);
-    inputUrl.value = decodeURIComponent(urlParameters.get("input"));
+    const inputValue = urlParameters.get("input");
+    if (inputValue) { inputUrl.value = decodeURIComponent(inputValue); }
     const storedCookies = localStorage.getItem("cookies");
     if (storedCookies) { textareaCookies.value = storedCookies; }
 

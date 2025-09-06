@@ -70,8 +70,10 @@ class Server {
 
     async #processWebUi(client, parsedRequest) {
         const requestedPath = parsedRequest.path.trimEnd();
-        const filePath = requestedPath === "/web_ui" || requestedPath === "/web_ui/" ||
-            requestedPath.startsWith("/web_ui?") ? `${Utils.WEB_UI_DIRECTORY}/index.html` : requestedPath.substring(1);
+        const webUiPath = `/${Utils.WEB_UI_DIRECTORY}/`;
+        const filePath = requestedPath === webUiPath ||
+            (requestedPath.startsWith(webUiPath) && requestedPath.length > webUiPath.length && requestedPath[webUiPath.length] === '?') ?
+            `${Utils.WEB_UI_DIRECTORY}/index.html` : requestedPath.substring(1);
         if (filePath === `${Utils.WEB_UI_DIRECTORY}/index.html`) {
             Utils.logToConsole(`[${consoleFont.FOREGROUND_CYAN}WEB UI${consoleFont.DEFAULT}]: The client ${client[2]} is requested WEB UI base page`);
         }
@@ -92,7 +94,7 @@ class Server {
 
     async #processClient(client, parsedRequest) {
         Utils.logToConsole(`Client ${client[2]} sent: ${parsedRequest.method} ${parsedRequest.path}`);
-        if (parsedRequest.method === "GET" && parsedRequest.path.startsWith("/web_ui")) {
+        if (parsedRequest.method === "GET" && parsedRequest.path.startsWith(`/${Utils.WEB_UI_DIRECTORY}/`)) {
             await this.#processWebUi(client, parsedRequest);
             return;
         }
