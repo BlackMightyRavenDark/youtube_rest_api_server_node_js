@@ -16,7 +16,6 @@ class Clients {
         };
 
         switch (apiClientName) {
-            case "auto":
             case "tv_html5":
                 innertubeClient.id = "tv_html5";
                 innertubeClient.nameInHeaders = "7";
@@ -25,6 +24,7 @@ class Clients {
                 innertubeClient.supportsCookies = true;
                 break;
 
+            case "auto":
             case "tv_html5_simply":
                 innertubeClient.id = "tv_html5_simply";
                 innertubeClient.nameInHeaders = "75";
