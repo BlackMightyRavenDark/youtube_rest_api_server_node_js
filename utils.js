@@ -302,6 +302,15 @@ class Utils {
                             "embedUrl": "https://www.youtube.com/"
                         }
                     }
+                },
+                "tv_html5_simply": {
+                    "context": {
+                        "client": {
+                            "clientName": "TVHTML5_SIMPLY",
+                            "clientVersion": "1.0",
+                            "hl": "en", "timeZone": "UTC", "utcOffsetMinutes": 0
+                        }
+                    }
                 }
             }
 
@@ -327,6 +336,11 @@ class Utils {
                 "display_name": "Automatic",
                 "id": "auto",
                 "supports_cookies": true
+            },
+            {
+                "display_name": "TV HTML5 SIMPLY",
+                "id": "tv_html5_simply",
+                "supports_cookies": false
             },
             {
                 "display_name": "TV HTML5",

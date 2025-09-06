@@ -25,6 +25,12 @@ class Clients {
                 innertubeClient.supportsCookies = true;
                 break;
 
+            case "tv_html5_simply":
+                innertubeClient.id = "tv_html5_simply";
+                innertubeClient.nameInHeaders = "75";
+                innertubeClient.supportsCookies = false;
+                break;
+
             case "tv_embedded":
                 innertubeClient.id = "tv_embedded";
                 innertubeClient.nameInHeaders = "85";
