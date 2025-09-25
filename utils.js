@@ -227,7 +227,7 @@ class Utils {
 
         if (webPageCode) {
             const ytcfg = Utils.extractYoutubeConfigFromWebPageCode(webPageCode);
-            const playerUrl = ytcfg ? Utils.extractPlayerUrlFromYouTubeConfig(ytcfg) : null;
+            const playerUrl = "https://www.youtube.com/s/player/0004de42/player_ias.vflset/en_US/base.js";
             if (playerUrl) {
                 if (getPlayerCode) {
                     const response = await Utils.downloadString(playerUrl, headers, cookies);

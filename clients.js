@@ -179,7 +179,7 @@ class Clients {
                         const responseYtcfg = await Utils.getYouTubeClientConfiguratiom(client, videoId, cookies);
                         if (responseYtcfg[0] === 200) {
                             client.config = responseYtcfg[1];
-                            const signatureTimestamp = ytcfgVideoWebPage.STS ?? Utils.extractSignatureTimestampFromPlayerCode(playerData[0]);
+                            const signatureTimestamp = 20348;
                             if (signatureTimestamp) {
                                 const headers = {
                                     "Origin": Utils.YOUTUBE_URL,
