@@ -139,6 +139,8 @@ class Clients {
         const parsedVideoInfo = Parser.parseVideoInfo(rawVideoInfoFromWebPage, client.id);
         if (parsedVideoInfo.title) {
             Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: ${consoleFont.FOREGROUND_CYAN}${parsedVideoInfo.title}${consoleFont.DEFAULT}`);
+        } else {
+            Utils.logToConsole(`${consoleFont.BACKGROUND_BRIGHT_RED}[${videoId}]: Video title is not detected!${consoleFont.DEFAULT}`);
         }
 
         if (parsedVideoInfo.playability_status.is_sponsors_only) {
