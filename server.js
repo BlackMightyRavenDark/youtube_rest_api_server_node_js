@@ -174,7 +174,7 @@ class Server {
         if (!parsedRequest.path || parsedRequest.path === "/") {
             Utils.logToConsole(`Sending help message to client ${client[2]}...`);
             Utils.answerClient(client[1], 400, null,
-                `Wrong request! To use this server, navigate to 'GET /web_ui'`);
+                `Wrong request! To use this server, navigate to 'GET /web_ui/'`);
         } else {
             Utils.answerClient(client[1], 400, null, "Wrong request!");
         }
