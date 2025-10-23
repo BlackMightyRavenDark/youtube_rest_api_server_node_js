@@ -311,6 +311,17 @@ class Utils {
                             "hl": "en", "timeZone": "UTC", "utcOffsetMinutes": 0
                         }
                     }
+                },
+                "android_sdkless": {
+                    "context": {
+                        "client": {
+                            "clientName": "ANDROID",
+                            "clientVersion": "20.10.38",
+                            "userAgent": "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip",
+                            "osName": "Android",
+                            "osVersion": "11"
+                        }
+                    }
                 }
             }
 
@@ -355,6 +366,11 @@ class Utils {
             {
                 "display_name": "WEB EMBEDDED",
                 "id": "web_embedded",
+                "supports_cookies": false
+            },
+            {
+                "display_name": "ANDROID SDKLESS",
+                "id": "android_sdkless",
                 "supports_cookies": false
             }
         ]

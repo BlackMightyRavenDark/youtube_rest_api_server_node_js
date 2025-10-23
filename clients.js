@@ -45,6 +45,11 @@ class Clients {
                 innertubeClient.supportsCookies = false;
                 break;
 
+            case "android_sdkless":
+                innertubeClient.id = "android_sdkless";
+                innertubeClient.nameInHeaders = "3";
+                break;
+
             default:
                 Utils.answerClient(client[1], 500, null, `YouTube client '${apiClientName}' not found!`);
                 return;
