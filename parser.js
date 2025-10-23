@@ -149,7 +149,7 @@ class Parser {
         } else {
             parsed.playability_status.reason = rawVideoInfo.playabilityStatus.reason;
             parsed.playability_status.is_sponsors_only = rawVideoInfo.playabilityStatus.errorScreen.playerLegacyDesktopYpcOfferRenderer ? true : false;
-            const runs = parsed.playability_status.is_sponsors_only ? null : rawVideoInfo.playabilityStatus.errorScreen.playerErrorMessageRenderer?.subreason.runs;
+            const runs = parsed.playability_status.is_sponsors_only ? null : rawVideoInfo.playabilityStatus.errorScreen.playerErrorMessageRenderer?.subreason?.runs;
             const subreasonText = parsed.playability_status.is_sponsors_only ? rawVideoInfo.playabilityStatus.errorScreen.playerLegacyDesktopYpcOfferRenderer.offerDescription :
                 runs?.reduce((previous, current) => previous += current.text, "");
             parsed.playability_status.subreason = subreasonText;
