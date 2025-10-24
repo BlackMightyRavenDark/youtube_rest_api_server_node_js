@@ -8,57 +8,38 @@ const Utils = require("./utils");
 class Clients {
     static async getVideoInfo(videoId, apiClientName, config, cookies, client) {
         Utils.logToConsole(`Client ${client[2]} is requested video '${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}'`);
+
+        const clientList = this.getYouTubeClientList();
         if (!apiClientName || typeof(apiClientName) !== "string") { apiClientName = "auto"; }
-        if (apiClientName === "auto" && (cookies?.length > 0 || Utils.defaultCookies?.length > 0)) { apiClientName = "tv_embedded"; }
+        if (apiClientName === "auto") {
+            if (cookies?.length > 0 || Utils.defaultCookies?.length > 0) { apiClientName = "tv_embedded"; }
+            else {
+                const defaultClient = Object.values(clientList).find(item => item.default );
+                if (!defaultClient) {
+                    Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: ` +
+                        `The default YouTube client is not found! Sending response to ${client[2]}...`);
+                    Utils.answerClient(client[1], 500, null, {
+                        "error_code": 500,
+                        "message": "The default YouTube client is not found!"
+                    });
+                    return;
+                }
 
-        const innertubeClient = {
-            "userAgentWebPage": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"
-        };
-
-        switch (apiClientName) {
-            case "auto":
-            case "tv_html5":
-                innertubeClient.id = "tv_html5";
-                innertubeClient.nameInHeaders = "7";
-                innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)";
-                innertubeClient.userAgentYtcfg = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version";
-                innertubeClient.supportsCookies = true;
-                break;
-
-            case "tv_html5_simply":
-                innertubeClient.id = "tv_html5_simply";
-                innertubeClient.nameInHeaders = "75";
-                innertubeClient.supportsCookies = false;
-                break;
-
-            case "tv_embedded":
-                innertubeClient.id = "tv_embedded";
-                innertubeClient.nameInHeaders = "85";
-                innertubeClient.supportsCookies = true;
-                break;
-
-            case "web_embedded":
-                innertubeClient.id = "web_embedded";
-                innertubeClient.userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)";
-                innertubeClient.userAgentYtcfg = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version";
-                innertubeClient.nameInHeaders = "56";
-                innertubeClient.supportsCookies = false;
-                break;
-
-            case "android_sdkless":
-                innertubeClient.id = "android_sdkless";
-                innertubeClient.nameInHeaders = "3";
-                break;
-
-            default:
-                Utils.answerClient(client[1], 500, null, `YouTube client '${apiClientName}' not found!`);
-                return;
+                apiClientName = defaultClient.id;
+            }
         }
 
-        if (innertubeClient.id) {
-            const infoResponse = await this.#getVideoInfoViaClient(innertubeClient, videoId, config, cookies);
+        if (clientList[apiClientName]) {
+            const infoResponse = await this.#getVideoInfoViaClient(clientList[apiClientName], videoId, config, cookies);
             Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: Sending response to ${client[2]}...`);
             Utils.answerClient(client[1], infoResponse.error_code, null, infoResponse, config.acceptEncoding);
+        } else {
+            Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: ` +
+                `The client '${apiClientName}' is not found! Sending response to ${client[2]}...`);
+            Utils.answerClient(client[1], 500, null, {
+                "error_code": 500,
+                "message": `The client '${apiClientName}' is not found!`
+            });
         }
     }
 
@@ -103,7 +84,7 @@ class Clients {
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate, br, zstd",
             "Host": "www.youtube.com",
-            "User-Agent": client.userAgentWebPage
+            "User-Agent": Utils.USER_AGENT_DEFAULT
         };
         if (cookieHeaderValue) { videoWebPageHeaders["cookie"] = cookieHeaderValue; }
 
@@ -191,11 +172,11 @@ class Clients {
                                 const headers = {
                                     "Origin": Utils.YOUTUBE_URL,
                                     "X-Goog-Visitor-Id": visitorData,
-                                    "X-YouTube-Client-Name": client.nameInHeaders,
+                                    "X-YouTube-Client-Name": client.name_in_headers,
                                     "X-YouTube-Client-Version": client.config.INNERTUBE_CONTEXT.client.clientVersion
                                 };
-                                if (client.userAgent) {
-                                    headers["User-Agent"] = `${client.userAgent},gzip(gfe)`;
+                                if (client.user_agent) {
+                                    headers["User-Agent"] = `${client.user_agent},gzip(gfe)`;
                                 }
                                 if (cookieHeaderValue) {
                                     headers["cookie"] = cookieHeaderValue;
@@ -332,6 +313,77 @@ class Clients {
                 }
 
                 return headers;
+            }
+        }
+    }
+
+    static getYouTubeClientList() {
+        return {
+            "tv_html5_simply": {
+                "display_name": "TV HTML5 SIMPLY",
+                "id": "tv_html5_simply",
+                "context": {
+                    "client": {
+                        "clientName": "TVHTML5_SIMPLY",
+                        "clientVersion": "1.0",
+                        "hl": "en",
+                        "timeZone": "UTC",
+                        "utcOffsetMinutes": 0
+                    }
+                },
+                "name_in_headers": "75"
+            },
+
+            "tv_html5": {
+                "display_name": "TV HTML5",
+                "id": "tv_html5",
+                "supports_cookies": true,
+                "name_in_headers": "7",
+                "user_agent": "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)",
+                "user_agent_ytcfg": "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version",
+                "default": true
+            },
+
+            "tv_embedded": {
+                "display_name": "TV EMBEDDED",
+                "id": "tv_embedded",
+                "supports_cookies": true,
+                "context": {
+                    "client": {
+                        "clientName": "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
+                        "clientVersion": "2.0",
+                        "hl": "en",
+                        "timeZone": "UTC",
+                        "utcOffsetMinutes": 0
+                    },
+                    "thirdParty": {
+                        "embedUrl": "https://www.youtube.com/"
+                    }
+                },
+                "name_in_headers": "85"
+            },
+
+            "web_embedded": {
+                "display_name": "WEB EMBEDDED",
+                "id": "web_embedded",
+                "user_agent": "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)",
+                "user_agent_ytcfg": "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version",
+                "name_in_headers": "56"
+            },
+
+            "android_sdkless": {
+                "display_name": "ANDROID SDKLESS",
+                "id": "android_sdkless",
+                "context": {
+                    "client": {
+                        "clientName": "ANDROID",
+                        "clientVersion": "20.10.38",
+                        "userAgent": "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip",
+                        "osName": "Android",
+                        "osVersion": "11"
+                    }
+                },
+                "name_in_headers": "3"
             }
         }
     }

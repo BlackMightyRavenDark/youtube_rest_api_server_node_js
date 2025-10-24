@@ -9,6 +9,7 @@ const zlib = require("node:zlib");
 class Utils {
     static get YOUTUBE_URL() { return "https://www.youtube.com"; }
     static get API_PLAYER_ENDPOINT_URL() { return `${Utils.YOUTUBE_URL}/youtubei/v1/player`; }
+    static get USER_AGENT_DEFAULT() { return "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0"; }
     static get WEB_UI_DIRECTORY() { return "web_ui"; }
 
     static answerClient(client, statusCode, headers, message, acceptEncoding) {
@@ -284,96 +285,27 @@ class Utils {
     }
 
     static async getYouTubeClientConfiguratiom(client, videoId, cookies) {
+        if (client.context) {
+            return [200, { "INNERTUBE_CONTEXT": client.context }];
+        }
+
         const urls = {
             "web_embedded": `https://www.youtube.com/embed/${videoId}?html5=1`,
             "tv_html5": "https://www.youtube.com/tv"
         };
         const url = urls[client.id];
-        if (!url) {
-            const clientContexts = {
-                "tv_embedded": {
-                    "context": {
-                        "client": {
-                            "clientName": "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
-                            "clientVersion": "2.0",
-                            "hl": "en", "timeZone": "UTC", "utcOffsetMinutes": 0
-                        },
-                        "thirdParty": {
-                            "embedUrl": "https://www.youtube.com/"
-                        }
-                    }
-                },
-                "tv_html5_simply": {
-                    "context": {
-                        "client": {
-                            "clientName": "TVHTML5_SIMPLY",
-                            "clientVersion": "1.0",
-                            "hl": "en", "timeZone": "UTC", "utcOffsetMinutes": 0
-                        }
-                    }
-                },
-                "android_sdkless": {
-                    "context": {
-                        "client": {
-                            "clientName": "ANDROID",
-                            "clientVersion": "20.10.38",
-                            "userAgent": "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip",
-                            "osName": "Android",
-                            "osVersion": "11"
-                        }
-                    }
-                }
+        if (url) {
+            const headers = { };
+            if (client.userAgentYtcfg) { headers["User-Agent"] = client.user_agent_ytcfg; }
+            else { headers["User-Agent"] = client.user_agent || Utils.USER_AGENT_DEFAULT; }
+            const response = await Utils.downloadString(url, headers, cookies);
+            if (response[0] == 200) {
+                const ytcfg = Utils.extractYoutubeConfigFromWebPageCode(response[2]);
+                return [ytcfg ? 200 : 400, ytcfg];
             }
-
-            const context = clientContexts[client.id];
-            return [context ? 200 : 404, context ? { "INNERTUBE_CONTEXT": context.context } : null];
         }
 
-        const headers = { };
-        if (client.userAgentYtcfg) { headers["User-Agent"] = client.userAgentYtcfg; }
-        else if (client.userAgent) { headers["User-Agent"] = client.userAgent; }
-        const response = await Utils.downloadString(url, headers, cookies);
-        if (response[0] == 200) {
-            const ytcfg = Utils.extractYoutubeConfigFromWebPageCode(response[2]);
-            return [ytcfg ? 200 : 400, ytcfg];
-        }
-
-        return [response[0], response[1]];
-    }
-
-    static getYouTubeClientList() {
-        return [
-            {
-                "display_name": "Automatic",
-                "id": "auto",
-                "supports_cookies": true
-            },
-            {
-                "display_name": "TV HTML5 SIMPLY",
-                "id": "tv_html5_simply",
-                "supports_cookies": false
-            },
-            {
-                "display_name": "TV HTML5",
-                "id": "tv_html5",
-                "supports_cookies": true
-            },
-            {
-                "display_name": "TV EMBEDDED",
-                "id": "tv_embedded",
-                "supports_cookies": true
-            },
-            {
-                "display_name": "WEB EMBEDDED",
-                "id": "web_embedded",
-                "supports_cookies": false
-            },
-            {
-                "display_name": "ANDROID SDKLESS",
-                "id": "android_sdkless",
-                "supports_cookies": false
-            }
-        ]
+        return [404, null];
     }
 
     static getYouTubeVideoUrl(videoId) {

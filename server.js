@@ -111,7 +111,8 @@ class Server {
 
                         case "/api/get_yt_client_list":
                             Utils.logToConsole(`Sending YouTube client list to ${client[2]}...`);
-                            Utils.answerClient(client[1], 200, null, Utils.getYouTubeClientList());
+                            const acceptEncodingHeaderValue = parsedRequest.headers ? parsedRequest.headers["accept-encoding"] : null;
+                            Utils.answerClient(client[1], 200, null, Clients.getYouTubeClientList(), acceptEncodingHeaderValue);
                             return;
                     }
                 }

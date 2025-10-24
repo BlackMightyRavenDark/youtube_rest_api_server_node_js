@@ -633,13 +633,13 @@ function enableControls(enabled) {
     clientSelector.parentNode.childNodes[clientSelector.parentNode.childNodes.length - 2].style.display = "none";
     if (response.status === 200) {
         const clients = await response.json();
-        clients.forEach(j => {
+        for (const key in clients) {
             const nodeOption = document.createElement("option");
-            nodeOption.value = j.id;
-            nodeOption.textContent = j.display_name;
-            nodeOption.setAttribute("supports_cookies", j.supports_cookies);
+            nodeOption.value = clients[key].id;
+            nodeOption.textContent = clients[key].display_name;
+            nodeOption.setAttribute("supports_cookies", clients[key].supports_cookies);
             clientSelector.appendChild(nodeOption);
-        });
+        };
 
         btnSearch.disabled = false;
     } else {
