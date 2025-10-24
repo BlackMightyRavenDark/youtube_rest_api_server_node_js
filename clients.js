@@ -340,8 +340,7 @@ class Clients {
                 "supports_cookies": true,
                 "name_in_headers": "7",
                 "user_agent": "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/25.lts.30.1034943-gold (unlike Gecko), Unknown_TV_Unknown_0/Unknown (Unknown, Unknown)",
-                "user_agent_ytcfg": "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version",
-                "default": true
+                "user_agent_ytcfg": "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version"
             },
 
             "tv_embedded": {
@@ -383,7 +382,8 @@ class Clients {
                         "osVersion": "11"
                     }
                 },
-                "name_in_headers": "3"
+                "name_in_headers": "3",
+                "default": true
             }
         }
     }
