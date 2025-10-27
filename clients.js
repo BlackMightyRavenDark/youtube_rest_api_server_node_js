@@ -51,7 +51,7 @@ class Clients {
             cookies = Utils.defaultCookies;
         }
 
-        if (!client.supportsCookies && cookies?.length > 0) {
+        if (!client.supports_cookies && cookies?.length > 0) {
             Utils.logToConsole(`[${consoleFont.FOREGROUND_BRIGHT_WHITE}${videoId}${consoleFont.DEFAULT}]: Client '${client.id}' does not support cookies`);
             return {
                 "error_code": 400,
