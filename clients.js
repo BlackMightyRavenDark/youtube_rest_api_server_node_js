@@ -167,7 +167,7 @@ class Clients {
                         const responseYtcfg = await Utils.getYouTubeClientConfiguratiom(client, videoId, cookies);
                         if (responseYtcfg[0] === 200) {
                             client.config = responseYtcfg[1];
-                            const signatureTimestamp = 20348;
+                            const signatureTimestamp = Utils.extractSignatureTimestampFromPlayerCode(playerCode);
                             if (signatureTimestamp) {
                                 const headers = {
                                     "Origin": Utils.YOUTUBE_URL,
@@ -177,6 +177,8 @@ class Clients {
                                 };
                                 if (client.user_agent) {
                                     headers["User-Agent"] = `${client.user_agent},gzip(gfe)`;
+                                } else if (client.config?.INNERTUBE_CONTEXT?.client.userAgent) {
+                                    headers["User-Agent"] = client.config.INNERTUBE_CONTEXT.client.userAgent;
                                 }
                                 if (cookieHeaderValue) {
                                     headers["cookie"] = cookieHeaderValue;
@@ -373,6 +375,7 @@ class Clients {
             "android_sdkless": {
                 "display_name": "ANDROID SDKLESS",
                 "id": "android_sdkless",
+                "supports_cookies": true,
                 "context": {
                     "client": {
                         "clientName": "ANDROID",
