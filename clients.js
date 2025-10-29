@@ -12,7 +12,7 @@ class Clients {
         const clientList = this.getYouTubeClientList();
         if (!apiClientName || typeof(apiClientName) !== "string") { apiClientName = "auto"; }
         if (apiClientName === "auto") {
-            if (cookies?.length > 0 || Utils.defaultCookies?.length > 0) { apiClientName = "tv_embedded"; }
+            if (cookies?.length > 0 || Utils.defaultCookies?.length > 0) { apiClientName = "android_sdkless"; }
             else {
                 const defaultClient = Object.values(clientList).find(item => item.default );
                 if (!defaultClient) {
