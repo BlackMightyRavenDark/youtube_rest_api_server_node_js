@@ -218,8 +218,9 @@ function parseJson(json) {
 
     nodeVideoInfoRoot.appendChild(nodeVideoBaseInfo);
 
-    if (jParsedVideoInfo.download_urls.streaming_data && jParsedVideoInfo.playability_status?.is_playable) {
-        const nodeFormatList = parseStreamingData(jParsedVideoInfo.download_urls.streaming_data);
+    const urls = jParsedVideoInfo.download_urls;
+    if (urls?.length > 0 && urls[0].streaming_data && jParsedVideoInfo.playability_status?.is_playable) {
+        const nodeFormatList = parseStreamingData(urls[0].streaming_data);
         if (nodeFormatList.childNodes.length > 0) { nodeVideoInfoRoot.appendChild(nodeFormatList); }
     } else {
         const nodePlayabilityStatus = parsePlayabilityStatus(jParsedVideoInfo.playability_status);

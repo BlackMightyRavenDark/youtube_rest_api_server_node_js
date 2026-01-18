@@ -94,6 +94,7 @@ class Clients {
         const ytcfgVideoWebPage = playerData[1];
         const playerCode = playerData[2] || "";
         const playerUrl = playerData[3] || "";
+        const webPageDate = playerData[4] || new Date();
 
         if (!videoWebPageCode) {
             const message = "Can't get video web page";
@@ -122,7 +123,7 @@ class Clients {
             return j;
         }
 
-        const parsedVideoInfo = Parser.parseVideoInfo(rawVideoInfoFromWebPage, client.id);
+        const parsedVideoInfo = Parser.parseVideoInfo(rawVideoInfoFromWebPage, "web_page", webPageDate);
         if (parsedVideoInfo.title) {
             Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: ${consoleFont.FOREGROUND_CYAN}${parsedVideoInfo.title}${consoleFont.DEFAULT}`);
         } else {
@@ -135,9 +136,9 @@ class Clients {
 
         let message;
         let errorCode;
-        const downloadUrls = { "client_id": client.id };
-        if (!parsedVideoInfo.playability_status.is_sponsors_only ||
-            (parsedVideoInfo.playability_status.is_sponsors_only && cookies?.length > 0)) {
+        const isSoPaidful = parsedVideoInfo.playability_status.is_offer;
+        const apiClientObject = { "client_id": client.id };
+        if (!isSoPaidful || (isSoPaidful && cookies?.length > 0)) {
             if (!ytcfgVideoWebPage) {
                 const message = "Can't extract the 'ytcfg' from web page";
                 Utils.logToConsole(`[${videoId}]: ${message}!`, true);
@@ -206,23 +207,23 @@ class Clients {
                                 if (client.params) { body["params"] = client.params; }
 
                                 Utils.logToConsole(`[${consoleFont.FOREGROUND_GREEN}${videoId}${consoleFont.DEFAULT}]: Calling ${client.id} API...`);
+                                const apiCallingDate = new Date();
                                 const responseApi = await fetch(Utils.API_PLAYER_ENDPOINT_URL,
                                     { "method": "POST", "headers": headers, "body": JSON.stringify(body) });
                                 if (responseApi.status === 200) {
                                     const responseApiJson = await responseApi.json();
                                     if (responseApiJson.streamingData) {
-                                        downloadUrls.streaming_data = responseApiJson.streamingData;
+                                        apiClientObject.streaming_data = responseApiJson.streamingData;
                                     }
                                 } else {
                                     Utils.logToConsole(`[${videoId}]: Failed to call ${client.id} API! Error details: ${responseApi.status} ${responseApi.statusText}`, true);
                                 }
 
-                                if (downloadUrls.streaming_data) {
-                                    const date = new Date();
-                                    downloadUrls.api_calling_date = date.toISOString();
-                                    downloadUrls.api_calling_date_epoch = date.getTime();
+                                apiClientObject.api_calling_date = apiCallingDate.toISOString();
+                                apiClientObject.api_calling_date_unix_ticks = apiCallingDate.getTime() * 10000;
 
-                                    if (!Parser.fixStreamingData(downloadUrls.streaming_data, playerCode, videoId)) {
+                                if (apiClientObject.streaming_data) {
+                                    if (!Parser.fixStreamingData(apiClientObject.streaming_data, playerCode, videoId)) {
                                         Utils.logToConsole(`[${videoId}]: ${consoleFont.BACKGROUND_BRIGHT_RED}There are some problems while fixing URLs...${consoleFont.DEFAULT}`);
                                     }
                                 } else {
@@ -269,9 +270,13 @@ class Clients {
         };
         const isParsedVideoInfoRequested = requestedDataSet.has("parsed_video_info") || requestedDataSet.has("all");
         if (message) { answer.message = message; }
-        if (getUrls) {
+        if (getUrls && apiClientObject.streaming_data) {
             const root = isParsedVideoInfoRequested && parsedVideoInfo ? parsedVideoInfo : answer;
-            root.download_urls = downloadUrls;
+            if (root.download_urls) {
+                root.download_urls = [ apiClientObject, ...root.download_urls ];
+            } else {
+                root.download_urls = [ apiClientObject ];
+            }
         }
         if (isParsedVideoInfoRequested) {
             answer["video_info"] = parsedVideoInfo;

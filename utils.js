@@ -218,6 +218,7 @@ class Utils {
     }
 
     static async getAdditionalData(videoId, webPageCode, getPlayerCode, headers, cookies) {
+        const date = new Date();
         if (!webPageCode && videoId) {
             const videoUrl = Utils.getYouTubeVideoUrl(videoId);
             const response = await Utils.downloadString(videoUrl, headers, cookies);
@@ -233,17 +234,17 @@ class Utils {
                 if (getPlayerCode) {
                     const response = await Utils.downloadString(playerUrl, headers, cookies);
                     if (response[0] === 200) {
-                        return [webPageCode, ytcfg, response[2], playerUrl];
+                        return [webPageCode, ytcfg, response[2], playerUrl, date];
                     }
                 } else {
-                    return [webPageCode, ytcfg, null, playerUrl];
+                    return [webPageCode, ytcfg, null, playerUrl, date];
                 }
             }
 
-            return [webPageCode, ytcfg, null, playerUrl];
+            return [webPageCode, ytcfg, null, playerUrl, date];
         }
 
-        return [null, null, null, null];
+        return [null, null, null, null, date];
     }
 
     static getCookie(cookies, name) {

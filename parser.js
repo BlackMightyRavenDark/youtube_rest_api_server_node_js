@@ -134,27 +134,55 @@ class Parser {
         return true;
     }
 
-    static parseVideoInfo(rawVideoInfo, clientId) {
+    static parseVideoInfo(rawVideoInfo, clientId, apiCallingDate) {
+        const status = rawVideoInfo.playabilityStatus.status || "";
+        const reason = rawVideoInfo.playabilityStatus.reason || "";
+        const isStatusOk = status?.toLowerCase() === "ok";
+        const isPrivate = reason?.includes("private");
+        const isAgeRestricted = !!reason && (reason.includes("confirm your age") || reason.includes("возраст"));
+        const isLoginRequired = !!status && (status.includes("LOGIN") || status.includes("ВХОД"));
+        const isBotWarning = !!reason && (reason.includes("not a bot") || reason.includes("вы не бот"));
+
         const parsed = {
             "playability_status": {
-                "is_playable": rawVideoInfo.playabilityStatus.status?.toLowerCase() === "ok",
-                "status": rawVideoInfo.playabilityStatus.status
+                "status": status,
+                "reason": reason,
+                "reason_details": rawVideoInfo.playabilityStatus.subreason || "",
+                "is_playable": isStatusOk,
+                "is_playable_in_embed": rawVideoInfo.playabilityStatus.playableInEmbed || false,
+                "is_private": isPrivate,
+                "is_adult": isAgeRestricted,
+                "is_login_required": isLoginRequired,
+                "is_bot_warning": isBotWarning
             }
         };
 
-        const liveInfo = { };
+        if (!isStatusOk) {
+            const playerErrorMessageRenderer = rawVideoInfo.playabilityStatus.errorScreen?.playerErrorMessageRenderer;
+            if (playerErrorMessageRenderer) {
+                const runs = playerErrorMessageRenderer.subreason.runs;
+                if (!parsed.playability_status.reason_details && runs && runs.length > 0) {
+                    parsed.playability_status.reason_details = runs[0].text?.trim();
+                }
+            }
 
-        if (parsed.playability_status.is_playable) {
-            parsed.playability_status.is_playable_in_embed = rawVideoInfo.playabilityStatus.playableInEmbed;
-        } else {
-            parsed.playability_status.reason = rawVideoInfo.playabilityStatus.reason;
-            parsed.playability_status.is_sponsors_only = rawVideoInfo.playabilityStatus.errorScreen.playerLegacyDesktopYpcOfferRenderer ? true : false;
-            const runs = parsed.playability_status.is_sponsors_only ? null : rawVideoInfo.playabilityStatus.errorScreen.playerErrorMessageRenderer?.subreason?.runs;
-            const subreasonText = parsed.playability_status.is_sponsors_only ? rawVideoInfo.playabilityStatus.errorScreen.playerLegacyDesktopYpcOfferRenderer.offerDescription :
-                runs?.reduce((previous, current) => previous += current.text, "");
-            parsed.playability_status.subreason = subreasonText;
-            if (!parsed.playability_status.is_sponsors_only) {
-                parsed.playability_status.image_url = `https:${rawVideoInfo.playabilityStatus.errorScreen.playerErrorMessageRenderer.thumbnail.thumbnails[0].url}`;
+            if (!parsed.playability_status.reason) {
+                parsed.playability_status.reason = playerErrorMessageRenderer.reason || "";
+            }
+
+            const playerLegacyDesktopYpcOfferRenderer = rawVideoInfo.playabilityStatus.errorScreen?.playerLegacyDesktopYpcOfferRenderer;
+            if (playerLegacyDesktopYpcOfferRenderer) {
+                parsed.playability_status.is_offer = true;
+                parsed.playability_status.offer_id = playerLegacyDesktopYpcOfferRenderer.offerId || "";
+                if (typeof(playerLegacyDesktopYpcOfferRenderer.offerDescription) === "string" &&
+                    playerLegacyDesktopYpcOfferRenderer.offerDescription !== reason) {
+                    parsed.playability_status.offer_description = playerLegacyDesktopYpcOfferRenderer.offerDescription;
+                }
+            }
+
+            const thumbnails = playerErrorMessageRenderer?.thumbnail?.thumbnails;
+            if (thumbnails?.length > 0) {
+                parsed.playability_status.thumbnail_url = `https:${thumbnails[0].url}`;
             }
         }
 
@@ -164,26 +192,17 @@ class Parser {
             parsed.owner_channel = {
                 "title": rawVideoInfo.videoDetails.author,
                 "id": rawVideoInfo.videoDetails.channelId
-            };
-            if (rawVideoInfo.videoDetails.shortDescription) {
-                parsed.description = rawVideoInfo.videoDetails.shortDescription;
             }
+            parsed.url = Utils.getYouTubeVideoUrl(parsed.id);
             parsed.length_seconds = rawVideoInfo.videoDetails.lengthSeconds ? Number.parseInt(rawVideoInfo.videoDetails.lengthSeconds) : 0;
-            if (parsed.length_seconds) {
-                const date = new Date(parsed.length_seconds * 1000);
-                parsed.length = parsed.length_seconds >= 3600 ?
-                    `${date.getUTCHours()}:${date.getUTCMinutes().toString().padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}` :
-                    `${date.getUTCMinutes().toString().padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}`;
-            }
+            parsed.length = this.#formatVideoDuration(parsed.length_seconds);
             parsed.view_count = Number.parseInt(rawVideoInfo.videoDetails.viewCount);
             parsed.is_private = rawVideoInfo.videoDetails.isPrivate;
             parsed.is_live_content = rawVideoInfo.videoDetails.isLiveContent || false;
-            if (parsed.is_live_content) {
-                liveInfo.is_live_now = rawVideoInfo.videoDetails.isLive || false;
-                liveInfo.is_low_latency_live_stream = rawVideoInfo.videoDetails.isLowLatencyLiveStream || false;
-                parsed.live_info = liveInfo;
-            }
             parsed.is_crawlable = rawVideoInfo.videoDetails.isCrawlable;
+            if (rawVideoInfo.videoDetails.shortDescription) {
+                parsed.description = rawVideoInfo.videoDetails.shortDescription;
+            }
         }
 
         const jMicroformat = rawVideoInfo.microformat?.playerMicroformatRenderer;
@@ -198,37 +217,66 @@ class Parser {
             parsed.is_unlisted = jMicroformat.isUnlisted;
             parsed.date_publish = jMicroformat.publishDate;
             const datePublish = new Date(jMicroformat.publishDate);
-            parsed.date_publish_epoch = datePublish.getTime();
+            parsed.date_publish_unix = datePublish.getTime();
             if (jMicroformat.uploadDate) {
                 const dateUpload = new Date(jMicroformat.uploadDate);
                 parsed.date_upload = jMicroformat.uploadDate;
-                parsed.date_upload_epoch = dateUpload.getTime();
+                parsed.date_upload_unix = dateUpload.getTime();
             }
             if (jMicroformat.liveBroadcastDetails) {
-                liveInfo.is_live_now = jMicroformat.liveBroadcastDetails.isLiveNow || false;
-                if (jMicroformat.liveBroadcastDetails.startTimestamp) {
-                    liveInfo.start_date = jMicroformat.liveBroadcastDetails.startTimestamp;
-                    const dateStart = new Date(jMicroformat.liveBroadcastDetails.startTimestamp);
-                    liveInfo.start_date_epoch = dateStart.getTime();
+                const liveInfo = {
+                    "is_live_now": jMicroformat.liveBroadcastDetails.isLiveNow || false,
+                    "is_low_latency_live_stream": rawVideoInfo.videoDetails?.isLowLatencyLiveStream || false
+                };
 
-                    if (jMicroformat.liveBroadcastDetails.endTimestamp) {
-                        liveInfo.end_date = jMicroformat.liveBroadcastDetails.endTimestamp;
-                        const dateEnd = new Date(jMicroformat.liveBroadcastDetails.endTimestamp);
-                        liveInfo.end_date_epoch = dateEnd.getTime();
-                    }
+                if (jMicroformat.liveBroadcastDetails.startTimestamp) {
+                    liveInfo.start_timestamp = jMicroformat.liveBroadcastDetails.startTimestamp;
+                    const dateStart = new Date(jMicroformat.liveBroadcastDetails.startTimestamp);
+                    liveInfo.start_timestamp_unix = dateStart.getTime();
                 }
 
-                if (!parsed.live_info) { parsed.live_info = liveInfo; }
+                if (liveInfo.is_live_now && jMicroformat.liveBroadcastDetails.endTimestamp) {
+                    liveInfo.end_timestamp = jMicroformat.liveBroadcastDetails.endTimestamp;
+                    const dateEnd = new Date(jMicroformat.liveBroadcastDetails.endTimestamp);
+                    liveInfo.end_timestamp_unix = dateEnd.getTime();
+                }
+
+                parsed.live_stream_info = liveInfo;
             }
         }
 
-        parsed.thumbnails = Utils.extractThumbnailList(rawVideoInfo);
-        parsed.download_urls = { "client_id": clientId ?? "unknown" };
+        const parsedThumbnails = Utils.extractThumbnailList(rawVideoInfo);
+        if (parsedThumbnails?.length > 0) { parsed.thumbnails = parsedThumbnails; }
+
         if (rawVideoInfo.streamingData) {
-            parsed.download_urls.streaming_data = rawVideoInfo.streamingData;
+            const clientObject = {
+                "client_id": clientId ?? "unknown",
+                "streaming_data": rawVideoInfo.streamingData
+            }
+            if (apiCallingDate) {
+                clientObject.api_calling_date = apiCallingDate;
+                clientObject.api_calling_date_unix_ticks = apiCallingDate.getTime() * 10000;
+            }
+
+            parsed.download_urls = [ clientObject ];
         }
 
         return parsed;
+    }
+
+    static #formatVideoDuration(seconds) {
+        if (seconds > 0) {
+            const date = new Date(seconds * 1000);
+            if (seconds >= 3600) {
+                return `${date.getUTCHours()}:${date.getUTCMinutes().toString().padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}`;
+            } else if (seconds >= 60) {
+                return `${date.getUTCMinutes()}:${date.getUTCSeconds().toString().padStart(2, "0")}`;
+            } else if (seconds > 0) {
+                return `0:${date.getUTCSeconds().toString().padStart(2, "0")}`;
+            }
+        }
+
+        return "0:00:00";
     }
 }
 
