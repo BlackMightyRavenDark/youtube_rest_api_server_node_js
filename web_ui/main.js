@@ -353,6 +353,10 @@ function createGroup(formats, groupName) {
             const nodeResolutionFps = document.createElement("span");
             nodeResolutionFps.textContent = `${format.width}x${format.height}, ${format.fps}fps`;
             nodeFormatItem.appendChild(nodeResolutionFps);
+        } else if (format.isVb) {
+            const nodeVoiceBoosted = document.createElement("span");
+            nodeVoiceBoosted.textContent = "<Voice boost>";
+            nodeFormatItem.appendChild(nodeVoiceBoosted);
         }
 
         const nodeFileExtension = document.createElement("span");
