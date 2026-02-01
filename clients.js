@@ -12,7 +12,7 @@ class Clients {
         const clientList = this.getYouTubeClientList();
         if (!apiClientName || typeof(apiClientName) !== "string") { apiClientName = "auto"; }
         if (apiClientName === "auto") {
-            if (cookies?.length > 0 || Utils.defaultCookies?.length > 0) { apiClientName = "android_sdkless"; }
+            if (cookies?.length > 0 || Utils.defaultCookies?.length > 0) { apiClientName = "android_vr"; }
             else {
                 const defaultClient = Object.values(clientList).find(item => item.default );
                 if (!defaultClient) {
@@ -177,7 +177,7 @@ class Clients {
                                     "X-YouTube-Client-Version": client.config.INNERTUBE_CONTEXT.client.clientVersion
                                 };
                                 if (client.user_agent) {
-                                    headers["User-Agent"] = `${client.user_agent},gzip(gfe)`;
+                                    headers["User-Agent"] = client.user_agent;
                                 } else if (client.config?.INNERTUBE_CONTEXT?.client.userAgent) {
                                     headers["User-Agent"] = client.config.INNERTUBE_CONTEXT.client.userAgent;
                                 }
@@ -390,7 +390,25 @@ class Clients {
                         "osVersion": "11"
                     }
                 },
-                "name_in_headers": "3",
+                "name_in_headers": "3"
+            },
+
+            "android_vr": {
+                "display_name": "ANDROID VR",
+                "id": "android_vr",
+                "context": {
+                    "client": {
+                        "clientName": "ANDROID_VR",
+                        "clientVersion": "1.71.26",
+                        "deviceMake": "Oculus",
+                        "deviceModel": "Quest 3",
+                        "androidSdkVersion": 32,
+                        "userAgent": "com.google.android.apps.youtube.vr.oculus/1.71.26 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip",
+                        "osName": "Android",
+                        "osVersion": "12L",
+                    }
+                },
+                "name_in_headers": "28",
                 "default": true
             }
         }
